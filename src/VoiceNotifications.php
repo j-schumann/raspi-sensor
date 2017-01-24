@@ -1,5 +1,11 @@
 <?php
 
+/**
+ * @copyright   (c) 2014-17, Vrok
+ * @license     MIT License (http://www.opensource.org/licenses/mit-license.php)
+ * @author      Jakob Schumann <schumann@vrok.de>
+ */
+
 namespace RpiSensor;
 
 /**
@@ -142,9 +148,9 @@ class VoiceNotifications
     protected function readNotification(array $notification)
     {
         $fn = '/tmp/'.$notification['timestamp'].'.wav';
-        echo $notification['message']."\n";
+        echo $notification['messageTextShort']."\n";
 
-        system('pico2wave -l=de-DE -w='.$fn.' "'.$notification['message'].'"');
+        system('pico2wave -l=de-DE -w='.$fn.' "'.$notification['messageTextShort'].'"');
         system('aplay -q '.$fn);
         unlink($fn);
 

@@ -1,5 +1,11 @@
 <?php
 
+/**
+ * @copyright   (c) 2014-17, Vrok
+ * @license     MIT License (http://www.opensource.org/licenses/mit-license.php)
+ * @author      Jakob Schumann <schumann@vrok.de>
+ */
+
 namespace RpiSensor;
 
 use PhpSerial as BaseSerial;

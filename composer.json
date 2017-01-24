@@ -1,7 +1,7 @@
 {
     "name": "vrok/raspi-sensor",
     "description": "Raspberry scripts for interacting with the sensor-db",
-    "license": "private",
+    "license": "MIT",
     "homepage": "https://sensor.vrok.de/",
 
     "minimum-stability": "dev",
