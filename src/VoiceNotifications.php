@@ -148,9 +148,9 @@ class VoiceNotifications
     protected function readNotification(array $notification)
     {
         $fn = '/tmp/'.$notification['timestamp'].'.wav';
-        echo $notification['messageTextShort']."\n";
+        echo $notification['textShort']."\n";
 
-        system('pico2wave -l=de-DE -w='.$fn.' "'.$notification['messageTextShort'].'"');
+        system('pico2wave -l=de-DE -w='.$fn.' "'.$notification['textShort'].'"');
         system('aplay -q '.$fn);
         unlink($fn);
 
