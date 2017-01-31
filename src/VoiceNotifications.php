@@ -150,7 +150,8 @@ class VoiceNotifications
         $fn = '/tmp/'.$notification['timestamp'].'.wav';
         echo $notification['textShort']."\n";
 
-        system('pico2wave -l=de-DE -w='.$fn.' "'.$notification['textShort'].'"');
+        system('pico2wave -l=de-DE -w='.$fn.' "'
+                .addslashes($notification['textShort']).'"');
         system('aplay -q '.$fn);
         unlink($fn);
 
