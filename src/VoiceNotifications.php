@@ -93,7 +93,7 @@ class VoiceNotifications
             $this->timestamp = time();
         }
 
-        $notifications = $this->getData();
+        $notifications = $this->getNotifications();
         echo "retrieved ".count($notifications)
             ." notifications newer than "
             .date('Y-m-d H:i:s', $this->timestamp)."\n";
@@ -118,26 +118,15 @@ class VoiceNotifications
      *
      * @return array
      */
-    protected function getData()
+    protected function getNotifications()
     {
         $result = $this->api->getNotifications($this->timestamp);
-        if ($result['status'] != 200) {
-            echo 'API fail '.$result['status'].': '.$result['response']."\n";
+        if (isset($result['error'])) {
+            echo $result['error']."\n";
             return [];
         }
 
-        $json = json_decode($result['response'], true);
-        if (isset($json['message'])) {
-            echo 'API fail: '.$json['message']."\n";
-            return [];
-        }
-
-        if (!isset($json['notifications'])) {
-            echo "failed to read notifications\n";
-            return [];
-        }
-
-        return $json['notifications'];
+        return $result;
     }
 
     /**

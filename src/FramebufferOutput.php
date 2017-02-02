@@ -8,12 +8,9 @@
 
 namespace RpiSensor;
 
-use GDText\Box;
-use GDText\Color;
-
 /**
- * Create images from text and prepare images for output to a framebuffer device
- * using raw RGB565 format, e.g. fbtft devices.
+ * Prepare images for output to a framebuffer device using raw RGB565 format,
+ * e.g. fbtft devices.
  *
  * @see https://github.com/notro/fbtft
  */
@@ -25,7 +22,7 @@ class FramebufferOutput
      * @param int $rgb888
      * @return int
      */
-    public function rgb888ToRgb565(int $rgb888)
+    public function rgb888ToRgb565(int $rgb888) : int
     {
         return ($rgb888 >> 8 & 0xf800)
              | ($rgb888 >> 5 & 0x07e0)
@@ -40,7 +37,7 @@ class FramebufferOutput
      * @param int $b
      * @return int
      */
-    public function rgbToRgb565(int $r, int $g, int $b)
+    public function rgbToRgb565(int $r, int $g, int $b) : int
     {
         return (($r >> 3) << 11) | (($g >> 2) << 5) | ($b >> 3);
     }
@@ -53,7 +50,7 @@ class FramebufferOutput
      * @param resource $img
      * @return string
      */
-    function imageToFramebuffer($img)
+    public function imageToFramebuffer($img) : string
     {
         $h = imagesy($img);
         $w = imagesx($img);
@@ -74,35 +71,39 @@ class FramebufferOutput
      * Directly write the given image to the given framebuffer device or file.
      *
      * @param resource $img
-     * @param string $device
+     * @param string $file
+     *
+     * @return bool true if file/buffer was written, else false
      */
-    public function writeFramebuffer($img, string $device = '/dev/fb1')
+    public function writeFramebuffer($img, string $file = '/dev/fb1') : bool
     {
         $fbContent = $this->imageToFramebuffer($img);
-        file_put_contents($device, $fbContent);
+        $bytes = file_put_contents($file, $fbContent);
+
+        return $bytes == strlen($fbContent);
     }
 
     /**
-     * @todo params: image size, font color, bg color
+     * Retrieve the display resolution for the given framebuffer device.
      *
-     * @param type $text
-     * @return type
+     * @param string $fb
+     * @return array    [width, height]
+     * @throws \RuntimeException
      */
-    public function textToImage($text)
+    public function getFramebufferResolution(string $fb = 'fb1') : array
     {
-        $im = imagecreatetruecolor(160, 128);
-        $backgroundColor = imagecolorallocate($im, 0, 18, 64);
-        imagefill($im, 0, 0, $backgroundColor);
+        $res = file_get_contents('/sys/class/graphics/'.$fb.'/virtual_size');
+        if (!$res) {
+            throw new \RuntimeException('Could not read the framebuffer resolution');
+        }
 
-        $box = new Box($im);
-        $box->setFontFace(__DIR__.'/../fonts/coolvetica.ttf');
-        $box->setFontColor(new Color(255, 255, 255));
-        $box->setFontSize(16);
-        $box->setLineHeight(1.5);
-        $box->setBox(10, 10, 118, 150);
-        $box->setTextAlign('left', 'top');
-        $box->draw($text);
+        $wh = explode(',', $res);
+        if (count($wh) !== 2) {
+            throw new \RuntimeException('Could not parse the framebuffer resolution');
+        }
 
-        return imagerotate($im, 90, 0);
+        return [
+            'width'  => (int)trim($wh[0]),
+            'height' => (int)trim($wh[1])];
     }
 }

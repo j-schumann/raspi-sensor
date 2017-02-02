@@ -25,4 +25,4 @@ $data = [
 ];
 
 $result = $api->pushReading($data);
-echo 'API response '.$result['status'].': '.$result['response']."\n";
+echo 'API response '.json_encode($result)."\n";

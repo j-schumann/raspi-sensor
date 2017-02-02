@@ -43,61 +43,155 @@ class SensorApi
      * Pushes a single sensor reading to the API and returns the result.
      *
      * @param array $data
-     * @return array    [status, response]
+     * @return array    [error|message+notices]
      */
-    public function pushReading(array $data)
+    public function pushReading(array $data) : array
     {
         // inject the API key
         $data['apiKey'] = $this->apiKey;
 
-        // retrieve the CURL resource to the reading API endpoint
-        $ch = $this->getCurl($this->url.'api/reading/');
-        curl_setopt($ch, CURLOPT_POST, 1);
-        curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
+        $url = $this->url.'api/reading';
+        $result = $this->sendRequest($url, [], $data);
 
-        $response = curl_exec($ch);
-        $status   = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-        return ['status' => $status, 'response' => $response];
+        if (isset($result['error'])) {
+            return $result;
+        }
 
-        // @todo den status hier schon auswerten und nur die messages/notices
-        // oder FEhler zurückgeben
+        // server always responds with a message
+        // (either error message or "Success")
+        if (!isset($result['message'])) {
+            return [
+                'error' => 'failed to push reading the API',
+            ];
+        }
+
+        return $result;
+    }
+
+    /**
+     * Retrieve limit status information from the API.
+     * If an error occured the returned array has the key "error" with the
+     * message.
+     *
+     * @return array
+     */
+    public function getLimitStatus() : array
+    {
+        $url = $this->url.'api/limit-status';
+        $result = $this->sendRequest($url, [
+            'apiKey' => $this->apiKey,
+        ]);
+
+        if (isset($result['error'])) {
+            return $result;
+        }
+
+        if (!isset($result['status'])) {
+            return [
+                'error' => 'failed to retrieve limit status from the API',
+            ];
+        }
+
+        return $result['status'];
+    }
+
+    /**
+     * Retrieve sensor status information from the API.
+     *
+     * @return array
+     */
+    public function getSensorStatus(string $sensorIdentifier)
+    {
+        $url = $this->url.'api/sensor-status';
+        $result = $this->sendRequest($url, [
+            'apiKey' => $this->apiKey,
+            'sensor' => $sensorIdentifier,
+        ]);
+
+        if (isset($result['error'])) {
+            return $result;
+        }
+
+        if (!isset($result['sensor'])) {
+            return [
+                'error' => 'failed to retrieve sensor status from the API',
+            ];
+        }
+
+        return $result['sensor'];
     }
 
     /**
      * Retrieve notifications from the API that are newer than the given
      * timestamp.
+     * If an error occured the returned array has the key "error" with the
+     * message.
      *
      * @param int $timestamp
      * @return array
      */
-    public function getNotifications(int $timestamp)
+    public function getNotifications(int $timestamp) : array
     {
-        // retrieve the CURL resource to the notification API endpoint
-        $url = $this->url.'api/notifications/?apiKey='.$this->apiKey;
-        $url .= '&after='.$timestamp;
-        $ch = $this->getCurl($url);
+        $url = $this->url.'api/notifications';
+        $result = $this->sendRequest($url, [
+            'apiKey' => $this->apiKey,
+            'after'  => $timestamp,
+        ]);
 
-        $response = curl_exec($ch);
-        $status   = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-        return ['status' => $status, 'response' => $response];
+        if (isset($result['error'])) {
+            return $result;
+        }
 
-        // @todo den status hier schon auswerten und nur die notifications
-        // oder Fehler zurückgeben
+        if (!isset($result['notifications'])) {
+            return [
+                'error' => 'failed to retrieve notifications from the API',
+            ];
+        }
+
+        return $result['notifications'];
     }
 
     /**
-     * Retrieve a CURL resource to read/write from/to the API.
+     * Sends the given request to the API server and returns the response.
+     * If an error occured an array with the error message is returned.
      *
-     * @param string $url
-     * @return resource
+     * @param string $url   URL to the API endpoint, including action
+     * @param array $get    GET parameters to append to the URL
+     * @param mixed $post   data to encode as json and send as POST
+     * @return mixed        decoded JSON response (most time will be an array)
      */
-    protected function getCurl(string $url)
+    protected function sendRequest(string $url, array $get = [], $post = null)
     {
+        if (count($get)) {
+            $url .= '?'.http_build_query($get);
+        }
+
         $ch = curl_init($url);
         curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 1);
         curl_setopt($ch, CURLOPT_HEADER, 0);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
 
-        return $ch;
+        if ($post) {
+            curl_setopt($ch, CURLOPT_POST, 1);
+            curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($post));
+        }
+
+        $response = curl_exec($ch);
+        $status   = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+
+        if ($status != 200) {
+            return [
+                'error' => 'API fail '.$status.': '.$response,
+            ];
+        }
+
+        $json = json_decode($response, true);
+        if ($json === null) {
+            return [
+                'error' => 'API fail: invalid or empty JSON response',
+            ];
+        }
+
+        return $json;
     }
 }

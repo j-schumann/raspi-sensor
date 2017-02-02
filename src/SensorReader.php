@@ -127,14 +127,15 @@ class SensorReader
     {
         foreach ($this->lines as $k => $data) {
             $result = $this->api->pushReading($data);
-            if ($result['status'] != 200) {
-                echo 'API fail '.$result['status'].': '.$result['response']."\n";
+            if (isset($result['error'])) {
+                echo $result['error']."\n";
                 break;
             }
 
             unset($this->lines[$k]);
+
             //echo "posted: ".json_encode($data)."\n";
-            echo 'API response: '.$result['response']."\n";
+            echo 'API response: '.json_encode($result)."\n";
         }
     }
 }

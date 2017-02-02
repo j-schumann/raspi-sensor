@@ -11,4 +11,7 @@ return [
         'timestamp_file' => __DIR__.'/last_notification.txt',
         'power_pin'      => 7,
     ],
+    'display' => [
+        'device' => 'fb1',
+    ],
 ];
