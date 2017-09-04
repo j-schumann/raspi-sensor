@@ -91,6 +91,7 @@ class VoiceNotifications
 
         if (!$this->timestamp) {
             $this->timestamp = time();
+            file_put_contents($this->timestampFile, $this->timestamp);
         }
 
         $notifications = $this->getNotifications();

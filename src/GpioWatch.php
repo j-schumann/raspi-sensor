@@ -57,6 +57,7 @@ class GpioWatch
     public function setupPin(int $pin, array $config = [])
     {
         if (isset($config['pull_up']) && $config['pull_up']) {
+            // @todo: can PhpGpio implement this? Is there any API available?
             system("raspi-gpio set $pin pu");
         }
 
