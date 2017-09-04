@@ -1,17 +1,10 @@
 #!/usr/bin/php
 <?php
 /**
- * Script to watch the UART device for sensor readings, enters a loop, to be
- * run on system startup or via supervisor.
+ * Script for watching GPIO pins for changes and executing actions.
  */
 
 namespace RpiSensor;
-
-use PhpGpio\Gpio;
-
-ini_set('display_errors', true);
-require_once __DIR__.'/../vendor/autoload.php';
-$config = include __DIR__.'/../config.inc.php';
 
 ini_set('display_errors', true);
 require_once __DIR__.'/../vendor/autoload.php';
