@@ -128,6 +128,7 @@ class SensorReader
         foreach ($this->lines as $k => $data) {
             $result = $this->api->pushReading($data);
             if (isset($result['error'])) {
+                echo json_encode($data)."\n";
                 echo $result['error']."\n";
                 break;
             }

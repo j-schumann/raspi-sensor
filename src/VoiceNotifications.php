@@ -158,6 +158,7 @@ class VoiceNotifications
     protected function powerOn()
     {
         if ($this->powerPin > -1) {
+            system('amixer -q set PCM 90%');
             system('raspi-gpio set '.$this->powerPin.' op');
             system('raspi-gpio set '.$this->powerPin.' dl');
         }

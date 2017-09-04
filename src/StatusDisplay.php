@@ -78,7 +78,7 @@ class StatusDisplay
      * Called when all limits are currently ok.
      * Displays general status information.
      */
-    protected function displayOk()
+    public function displayOk()
     {
         $fb = new FramebufferOutput();
         $res = $fb->getFramebufferResolution($this->device);
@@ -88,12 +88,11 @@ class StatusDisplay
         if (!isset($wz['items']) || !isset($fenster['items'])) {
             $text = 'Konnte Sensor-Status nicht lesen!';
         } else {
-            $text = 'Innen: '.round($wz['items']['t']['lastValue'], 1)
+            $text = 'In: '.round($wz['items']['t']['lastValue'], 1)
                     .$wz['items']['t']['unit']."\n"
-                    .'Aussen: '.round($fenster['items']['t2']['lastValue'], 1)
+                    .'Out: '.round($fenster['items']['t2']['lastValue'], 1)
                     .$fenster['items']['t2']['unit'];
         }
-
 
         // flip w/h here and rotate the image later as the display is attached
         // in portrait mode (setting rotate in fbtft config causes lines with
@@ -101,14 +100,15 @@ class StatusDisplay
         // wide screen
         $im = imagecreatetruecolor($res['height'], $res['width']);
 
-        $backgroundColor = imagecolorallocate($im, 0, 150, 0);
+        $backgroundColor = imagecolorallocate($im, 0, 120, 0);
         imagefill($im, 0, 0, $backgroundColor);
 
         $box = new Box($im);
-        $box->setFontFace(__DIR__.'/../fonts/coolvetica.ttf');
+//        $box->setFontFace(__DIR__.'/../fonts/coolvetica.ttf');
+        $box->setFontFace(__DIR__.'/../fonts/Sansation_Bold.ttf');
         $box->setFontColor(new Color(255, 255, 255));
-        $box->setFontSize(16);
-        $box->setLineHeight(1.5);
+        $box->setFontSize(28);
+        $box->setLineHeight(1.2);
         $box->setBox(10/*x*/, 0/*y*/, $res['height'] - 10, $res['width']);
         $box->setTextAlign('left', 'top');
         $box->draw($text);
@@ -128,7 +128,6 @@ class StatusDisplay
         $text = '';
         for ($i = 0; $i < min(4, count($matches)); $i++) {
             $status = $this->status[$matches[$i]];
-            var_dump($status);
             if ($status['customMessage']) {
                 $text .= $status['customMessage']."\n";
             } else {
@@ -152,10 +151,11 @@ class StatusDisplay
         imagefill($im, 0, 0, $backgroundColor);
 
         $box = new Box($im);
-        $box->setFontFace(__DIR__.'/../fonts/coolvetica.ttf');
+//        $box->setFontFace(__DIR__.'/../fonts/coolvetica.ttf');
+        $box->setFontFace(__DIR__.'/../fonts/Sansation_Bold.ttf');
         $box->setFontColor(new Color(255, 255, 255));
-        $box->setFontSize(16);
-        $box->setLineHeight(1.5);
+        $box->setFontSize(28);
+        $box->setLineHeight(1.2);
         $box->setBox(10/*x*/, 0/*y*/, $res['height'] - 10, $res['width']);
         $box->setTextAlign('left', 'top');
         $box->draw($text);

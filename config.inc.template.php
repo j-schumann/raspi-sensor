@@ -14,4 +14,13 @@ return [
     'display' => [
         'device' => 'fb1',
     ],
+    'gpio_watch' => [
+        22 => [
+            'pull_up' => true,
+            'watch_for' => 0,
+            'callback' => function(RpiSensor\GpioWatch $gpioWatch) {
+                $gpioWatch->statusDisplay->update();
+            }
+        ],
+    ],
 ];
